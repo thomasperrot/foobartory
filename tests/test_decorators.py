@@ -1,8 +1,8 @@
 import pytest
 
-from foobartory.models import Robot
 from foobartory.config import SWITCH_ACTIVITY_DELAY
 from foobartory.decorators import activity
+from foobartory.models import Robot
 
 
 class DummyRobot(Robot):

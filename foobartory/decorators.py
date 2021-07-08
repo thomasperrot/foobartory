@@ -1,10 +1,11 @@
 import functools
 import logging
-from typing import Awaitable, Callable, TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Awaitable, Callable
 
 if TYPE_CHECKING:
     from foobartory.models import Robot
+
+logger = logging.getLogger(__name__)
 
 
 def activity(func: Callable[["Robot"], Awaitable]):
@@ -14,11 +15,11 @@ def activity(func: Callable[["Robot"], Awaitable]):
     """
 
     @functools.wraps(func)
-    async def wrapper(self):
+    async def wrapper(self: "Robot"):
         await self.check_activity(func.__name__)
         await func(self)
         if not self._stopped:
-            logging.info("[*] %s did %s", self, func.__name__)
-            logging.debug(self._factory)
+            logger.info("[*] %s did %s", self, func.__name__)
+            logger.debug(self._factory)
 
     return wrapper

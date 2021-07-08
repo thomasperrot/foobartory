@@ -1,9 +1,14 @@
 import asyncio
+import logging
 import random
 import uuid
 
-from foobartory.config import *
+import click
+
+from foobartory import config
 from foobartory.decorators import activity
+
+logger = logging.getLogger(__name__)
 
 
 class Foo:
@@ -50,7 +55,7 @@ class Robot:
         """Check if the robot is switching activity. If so, it must sleep."""
 
         if new_activity != self._current_activity:
-            await asyncio.sleep(SWITCH_ACTIVITY_DELAY)
+            await asyncio.sleep(config.SWITCH_ACTIVITY_DELAY / self._factory.speed)
             self._current_activity = new_activity
 
     async def run(self) -> None:
@@ -82,21 +87,21 @@ class Robot:
     def must_harvest_foo(self) -> bool:
         """Robot must harvest Foo if they do not have enough Foo to create a Robot."""
 
-        return self._factory.foo_queue.qsize() < ROBOT_COST_FOO
+        return self._factory.foo_queue.qsize() < config.ROBOT_COST_FOO
 
     @activity
     async def harvest_foo(self) -> None:
         """Put a new Foo in Foo queue."""
 
-        await asyncio.sleep(FOO_MINING_DELAY)
+        await asyncio.sleep(config.FOO_MINING_DELAY / self._factory.speed)
         self._factory.foo_queue.put_nowait(Foo())
 
     @activity
     async def harvest_bar(self) -> None:
         """Put a new Bar in Bar queue."""
 
-        delay = random.uniform(BAR_MINING_MIN_DELAY, BAR_MINING_MAX_DELAY)
-        await asyncio.sleep(delay)
+        delay = random.uniform(config.BAR_MINING_MIN_DELAY, config.BAR_MINING_MAX_DELAY)
+        await asyncio.sleep(delay / self._factory.speed)
         self._factory.bar_queue.put_nowait(Bar())
 
     @property
@@ -117,8 +122,8 @@ class Robot:
         foo = self._factory.foo_queue.get_nowait()
         bar = self._factory.bar_queue.get_nowait()
 
-        await asyncio.sleep(FOOBAR_CREATION_DELAY)
-        if random.random() <= FOOBAR_SUCCESS_RATE:
+        await asyncio.sleep(config.FOOBAR_CREATION_DELAY / self._factory.speed)
+        if random.random() <= config.FOOBAR_SUCCESS_RATE:
             self._factory.foobar_queue.put_nowait(FooBar(foo, bar))
         else:
             self._factory.bar_queue.put_nowait(bar)
@@ -136,17 +141,16 @@ class Robot:
 
     @activity
     async def sell_foobar(self) -> None:
-        """Get FooBars from FooBar queue, and sell them to increase the factory account.
-        """
+        """Get FooBars from FooBar queue, and sell them to increase the factory account."""
 
-        await asyncio.sleep(FOOBAR_SELL_DELAY)
-        for _ in range(FOOBAR_SELL_MAX):
+        await asyncio.sleep(config.FOOBAR_SELL_DELAY / self._factory.speed)
+        for _ in range(config.FOOBAR_SELL_MAX):
             try:
                 self._factory.foobar_queue.get_nowait()
             except asyncio.QueueEmpty:
                 break
             else:
-                self._factory.account += FOOBAR_PRICE
+                self._factory.account += config.FOOBAR_PRICE
 
     @property
     def must_buy_robot(self) -> bool:
@@ -154,8 +158,8 @@ class Robot:
         Foo, and if no other robot is currently buying robot."""
 
         return (
-            self._factory.account >= ROBOT_COST_EUROS
-            and self._factory.foo_queue.qsize() >= ROBOT_COST_FOO
+            self._factory.account >= config.ROBOT_COST_EUROS
+            and self._factory.foo_queue.qsize() >= config.ROBOT_COST_FOO
             and not self._factory.buy_robot_lock.locked()
         )
 
@@ -164,12 +168,12 @@ class Robot:
         """Create a new Robot, and it to the factory."""
 
         if (
-            self._factory.account < ROBOT_COST_EUROS
-            or self._factory.foo_queue.qsize() < ROBOT_COST_FOO
+            self._factory.account < config.ROBOT_COST_EUROS
+            or self._factory.foo_queue.qsize() < config.ROBOT_COST_FOO
         ):
             return
-        self._factory.account -= ROBOT_COST_EUROS
-        for _ in range(ROBOT_COST_FOO):
+        self._factory.account -= config.ROBOT_COST_EUROS
+        for _ in range(config.ROBOT_COST_FOO):
             self._factory.foo_queue.get_nowait()
         self._factory.add_robot(Robot(factory=self._factory))
 
@@ -181,12 +185,13 @@ class Factory:
     robots.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, speed: float = 1) -> None:
+        self.speed = speed
         self.robots = []
         self.account = 0
 
         # queues
-        self.foo_queue = asyncio.Queue()
+        self.foo_queue  = asyncio.Queue()
         self.bar_queue = asyncio.Queue()
         self.foobar_queue = asyncio.Queue()
 
@@ -195,18 +200,19 @@ class Factory:
         self.buy_robot_lock = asyncio.Lock()
 
     def __str__(self) -> str:
-        return f"""        robots: {len(self.robots)}, 
-        account: {self.account}, 
-        foo: {self.foo_queue.qsize()}, 
-        bar: {self.bar_queue.qsize()}, 
-        foobar: {self.foobar_queue.qsize()}"""
+        return f"""robots: {len(self.robots)},
+account: {self.account},
+foo: {self.foo_queue.qsize()},
+bar: {self.bar_queue.qsize()},
+foobar: {self.foobar_queue.qsize()}"""
 
     def add_robot(self, robot: Robot) -> None:
         self.robots.append(robot)
-        if len(self.robots) == ROBOT_MAX_NUMBER:
-            print("[+] Congratulation, you have 30 robots!")
+        if len(self.robots) == config.ROBOT_MAX_NUMBER:
+            click.echo("[+] Congratulation, you have 30 robots!")
             self.stop_robots()
         else:
+            click.echo(f"[*] You now have {len(self.robots)} robots")
             asyncio.create_task(robot.run())
 
     def stop_robots(self) -> None:

@@ -1,7 +1,7 @@
 import pytest
 
 import foobartory
-from foobartory.models import Robot, Foo, Bar, FooBar
+from foobartory.models import Bar, Foo, FooBar, Robot
 
 
 @pytest.fixture
@@ -13,6 +13,10 @@ def robot(factory):
 
 def test_initial_activity(robot):
     assert robot._current_activity == "harvest_foo"
+
+
+def test_robot_str(robot):
+    assert str(robot) == "Robot 0"
 
 
 @pytest.mark.asyncio
@@ -286,10 +290,15 @@ def test_add_robot(mocker, factory):
     assert mock_create_task.call_args[0][0].__name__ == "run"
 
 
-def test_add_robot_end_the_game(mocker, factory):
+@pytest.mark.asyncio
+async def test_add_robot_end_the_game(factory):
     for _ in range(29):
         factory.add_robot(Robot(factory))
 
+    assert all(not robot._stopped for robot in factory.robots)
     factory.add_robot(Robot(factory))
-
     assert all(robot._stopped for robot in factory.robots)
+
+
+def test_factory_str(factory):
+    assert str(factory) == "robots: 0, \naccount: 0, \nfoo: 0, \nbar: 0, \nfoobar: 0"
