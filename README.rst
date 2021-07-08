@@ -2,7 +2,7 @@
 Foobartory
 **********
 
-.. image:: https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-blue?logo=python&logoColor=white
+.. image:: https://img.shields.io/badge/python-3.8%20%7C%203.9-blue?logo=python&logoColor=white
    :target: https://www.python.org/downloads/release
    :alt: Python3.6+ compatible
 
