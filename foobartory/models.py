@@ -2,6 +2,7 @@ import asyncio
 import logging
 import random
 import uuid
+from typing import List
 
 import click
 
@@ -46,7 +47,7 @@ class Robot:
         self._factory = factory
         self._current_activity = self.harvest_foo.__name__
         self._id = len(self._factory.robots)
-        self._stopped = False
+        self._stopped: bool = False
 
     def __str__(self) -> str:
         return f"Robot {self._id}"
@@ -141,7 +142,9 @@ class Robot:
 
     @activity
     async def sell_foobar(self) -> None:
-        """Get FooBars from FooBar queue, and sell them to increase the factory account."""
+        """Get FooBars from FooBar queue, and sell them to increase the factory
+        account.
+        """
 
         await asyncio.sleep(config.FOOBAR_SELL_DELAY / self._factory.speed)
         for _ in range(config.FOOBAR_SELL_MAX):
@@ -187,13 +190,13 @@ class Factory:
 
     def __init__(self, speed: float = 1) -> None:
         self.speed = speed
-        self.robots = []
+        self.robots: List[Robot] = []
         self.account = 0
 
         # queues
-        self.foo_queue  = asyncio.Queue()
-        self.bar_queue = asyncio.Queue()
-        self.foobar_queue = asyncio.Queue()
+        self.foo_queue: asyncio.Queue[Foo] = asyncio.Queue()
+        self.bar_queue: asyncio.Queue[Bar] = asyncio.Queue()
+        self.foobar_queue: asyncio.Queue[FooBar] = asyncio.Queue()
 
         # locks
         self.sell_foobar_lock = asyncio.Lock()

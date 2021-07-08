@@ -5,3 +5,4 @@ exclude tox.ini
 exclude pre-commit-hook
 exclude CONTRIBUTING.rst
 include LICENSE.rst
+include foobartory/banner.txt

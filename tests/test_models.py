@@ -4,35 +4,12 @@ import foobartory
 from foobartory.models import Bar, Foo, FooBar, Robot
 
 
-@pytest.fixture
-def robot(factory):
-    robot = Robot(factory)
-    factory.robots.append(robot)
-    return robot
-
-
 def test_initial_activity(robot):
     assert robot._current_activity == "harvest_foo"
 
 
 def test_robot_str(robot):
     assert str(robot) == "Robot 0"
-
-
-@pytest.mark.asyncio
-async def test_switch_activity_no_change(robot, mock_sleep):
-    await robot.check_activity("harvest_foo")
-
-    assert robot._current_activity == "harvest_foo"
-    mock_sleep.assert_not_awaited()
-
-
-@pytest.mark.asyncio
-async def test_switch_activity(robot, mock_sleep):
-    await robot.check_activity("harvest_bar")
-
-    assert robot._current_activity == "harvest_bar"
-    mock_sleep.assert_awaited_once_with(5)
 
 
 def test_stop(robot):
@@ -301,4 +278,4 @@ async def test_add_robot_end_the_game(factory):
 
 
 def test_factory_str(factory):
-    assert str(factory) == "robots: 0, \naccount: 0, \nfoo: 0, \nbar: 0, \nfoobar: 0"
+    assert str(factory) == "robots: 0,\naccount: 0,\nfoo: 0,\nbar: 0,\nfoobar: 0"
