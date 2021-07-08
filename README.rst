@@ -42,7 +42,9 @@ Quickstart
 
 .. code-block:: bash
 
-   $ python setup.py install
+   $ git clone git@github.com:thomasperrot/foobartory.git
+   $ cd foobartory
+   $ pip install .
 
 Once you have installed the package, you can run the Foobartory with the following command:
 
