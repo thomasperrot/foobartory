@@ -11,7 +11,7 @@ Foobartory
     :alt: Documentation Status
 
 .. image:: https://img.shields.io/github/workflow/status/thomasperrot/foobartory/CI?logo=github
-   :target: https://github.com/thomasperrot/foobartory/actions?workflow=tests
+   :target: https://github.com/thomasperrot/foobartory/actions/workflows/ci.yml
    :alt: Continuous Integration Status
 
 .. image:: https://codecov.io/gh/thomasperrot/foobartory/branch/master/graph/badge.svg?logo=codecov
@@ -34,7 +34,7 @@ An actor model to simulate an automated production chain using Python asyncio_.
 Here's an example
 
 .. image:: assets/example.gif
-  :width: 700
+  :width: 900
   :alt: The foobartory CLI
 
 Quickstart
@@ -44,7 +44,7 @@ Quickstart
 
    $ python setup.py install
 
-Once you have installed the package, you can run the Foobartory with the following options:
+Once you have installed the package, you can run the Foobartory with the following command:
 
 .. code-block::
 
@@ -76,8 +76,9 @@ the following architecture:
 * Each robot sends ``Foo``, ``Bar``,  ``FooBar`` and cash to RabbitMQ_ independent exchanges. Those four exchanges each have a unique queue, which is listen by all robots.
 * When a robot wants to buy a new robot, it sends a message in a RabbitMQ_ exchange to inform the factory. This exchange is common to all robots, and have a single unique queue, which is listen only by the factory.
 * The Factory is an independent process that is in charge of:
-   * starting new robots. To do this,
-   * stopping robots once 30 robots have been bought. To do this, the Factory sends a stop message to a dedicated exchange, which has one queue per robot. Every robot must stop when a message is received on that queue.
+
+  * starting new robots. To do this,
+  * stopping robots once 30 robots have been bought. To do this, the Factory sends a stop message to a dedicated exchange, which has one queue per robot. Every robot must stop when a message is received on that queue.
 
 .. _Docker: https://www.docker.com/
 .. _Redis lock: https://redis.io/topics/distlock
