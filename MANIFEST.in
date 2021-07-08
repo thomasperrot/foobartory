@@ -1,5 +1,6 @@
 prune tests
 prune docs
+prune assets
 exclude requirements.txt
 exclude tox.ini
 exclude pre-commit-hook
