@@ -202,6 +202,8 @@ class Factory:
         self.sell_foobar_lock = asyncio.Lock()
         self.buy_robot_lock = asyncio.Lock()
 
+        self._stopped = True
+
     def __str__(self) -> str:
         return f"""robots: {len(self.robots)},
 account: {self.account},
@@ -209,15 +211,27 @@ foo: {self.foo_queue.qsize()},
 bar: {self.bar_queue.qsize()},
 foobar: {self.foobar_queue.qsize()}"""
 
+    def run(self) -> None:
+        self._stopped = False
+        asyncio.get_event_loop().run_until_complete(self._run_until_stopped())
+
     def add_robot(self, robot: Robot) -> None:
         self.robots.append(robot)
         if len(self.robots) == config.ROBOT_MAX_NUMBER:
-            click.echo("[+] Congratulation, you have 30 robots!")
-            self.stop_robots()
+            self._stop()
         else:
             click.echo(f"[*] You now have {len(self.robots)} robots")
-            asyncio.create_task(robot.run())
+            asyncio.ensure_future(robot.run())
 
-    def stop_robots(self) -> None:
+    async def _run_until_stopped(self) -> None:
+        while not self._stopped:
+            await asyncio.sleep(0.1)
+
+    def _stop(self) -> None:
+        click.echo("[+] Congratulation, you have 30 robots!")
+        self._stopped = True
+        self._stop_robots()
+
+    def _stop_robots(self) -> None:
         for robot in self.robots:
             robot.stop()

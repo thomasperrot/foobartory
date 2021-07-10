@@ -1,7 +1,12 @@
 import pytest
 
 import foobartory
-from foobartory.models import Bar, Foo, FooBar, Robot
+from foobartory.models import Bar, Foo, FooBar, Robot, asyncio
+
+
+@pytest.fixture(autouse=True)
+def mock_sleep(mocker):
+    return mocker.patch.object(asyncio, "sleep")
 
 
 def test_initial_activity(robot):
@@ -258,7 +263,7 @@ async def test_buy_robot_not_enough_foo(factory, robot):
 
 
 def test_add_robot(mocker, factory):
-    mock_create_task = mocker.patch.object(foobartory.models.asyncio, "create_task")
+    mock_create_task = mocker.patch.object(foobartory.models.asyncio, "ensure_future")
     robot = Robot(factory)
     factory.add_robot(robot)
 

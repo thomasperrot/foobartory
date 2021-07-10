@@ -1,5 +1,12 @@
 import pytest
 
+from foobartory import models
+
+
+@pytest.fixture(autouse=True)
+def mock_sleep(mocker):
+    return mocker.patch.object(models.asyncio, "sleep")
+
 
 @pytest.mark.asyncio
 async def test_switch_activity_no_change(robot, mock_sleep):

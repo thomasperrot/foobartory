@@ -39,6 +39,8 @@ def test_cli():
         result.output
         == f"""{banner}
 [*] Starting factory...
+[*] You now have 1 robots
+[*] You now have 2 robots
 [*] You now have 3 robots
 [*] You now have 4 robots
 [*] You now have 5 robots

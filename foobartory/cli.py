@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from pathlib import Path
 
@@ -42,15 +41,14 @@ def cli(speed: float, verbose: int) -> None:
     with open(banner_path) as f:
         click.echo(f.read())
 
+    click.echo("[*] Starting factory...")
     factory = Factory(speed=speed)
 
     # Append the robots separately so they both have a distinct id
-    factory.robots.append(Robot(factory=factory))
-    factory.robots.append(Robot(factory=factory))
+    factory.add_robot(Robot(factory=factory))
+    factory.add_robot(Robot(factory=factory))
 
-    tasks = [robot.run() for robot in factory.robots]
-    click.echo("[*] Starting factory...")
-    asyncio.get_event_loop().run_until_complete(asyncio.gather(*tasks))
+    factory.run()
 
 
 def main():
